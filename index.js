@@ -12,32 +12,34 @@ const getRelationships = path('relationships');
 const polyfillRelationships = included =>
   flow(
     getRelationships,
-    reduce((acc, relationship, key) => {
-      const fullRelationship =
+
+    reduce((acc, relationRecord, key) => {
+      const extendRelationRecord =
         find(
-          inc => inc.type === relationship.data.type && inc.id === relationship.data.id,
+          inc => inc.type === relationRecord.data.type && inc.id === relationRecord.data.id,
           included
-        ) || relationship;
-      if (fullRelationship) {
-        let polyfills = getAttributes(fullRelationship);
+        ) || relationRecord;
 
-        if (getRelationships(fullRelationship)) {
-          polyfills = {
-            ...polyfills,
-            ...polyfillRelationships(included)(fullRelationship),
-          };
-        }
+      if (!extendRelationRecord) {
+        return acc;
+      }
 
-        return {
-          ...acc,
-          [key]: {
-            id: fullRelationship.id,
-            type: fullRelationship.type,
-            ...polyfills,
-          },
+      let polyfills = getAttributes(extendRelationRecord);
+      if (getRelationships(extendRelationRecord)) {
+        polyfills = {
+          ...polyfills,
+          ...polyfillRelationships(included)(extendRelationRecord),
         };
       }
-      return acc;
+
+      return {
+        ...acc,
+        [key]: {
+          id: extendRelationRecord.id,
+          type: extendRelationRecord.type,
+          ...polyfills,
+        },
+      };
     }, {})
   );
 
