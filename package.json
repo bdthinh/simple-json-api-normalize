@@ -1,0 +1,24 @@
+{
+  "name": "json-api-normalizer",
+  "version": "1.0.0",
+  "description": "Normalizer to simple object for json-api-spec",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "jsonApiNormalize",
+    "json-api-normalize",
+    "normalize",
+    "jsonapi",
+    "json-api"
+  ],
+  "author": "Thinh D. Bui",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
+  }
+}
