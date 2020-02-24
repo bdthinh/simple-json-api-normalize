@@ -1,41 +1,245 @@
-const jsonApiNormalize = require('./index');
+const normalize = require('./index');
 
-describe('jsonApiNormalize', () => {
-  it('should deserialize response with jsonapi spec', () => {
+describe('normalize', () => {
+  it('should not normalize response without jsonapi spec', () => {
+    const response = {
+      id: 1848,
+      subject: 'Re: Hi Stephane, reaching out from Seamless Philippines',
+      body: 'reply',
+    };
+    expect(normalize(response)).toEqual({
+      id: 1848,
+      subject: 'Re: Hi Stephane, reaching out from Seamless Philippines',
+      body: 'reply',
+    });
+  });
+
+  it('should normalize correctly even without attributes', () => {
     const response = {
       data: {
         id: '55',
-        type: 'tasks',
-        attributes: {
-          subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
-          body:
-            "Sender Max Lorenz <max@saleswhale.com>\r\nTo: max+redis_01@saleswhale.com, Chocolate Sim <chocolate.sim@saleswhale.com>\r\n\r\nYes, I am interested\r\n\r\nMax\r\nOn 8 Jan 2020, 4:34 PM +0800, Chocolate Sim <chocolate.sim@saleswhale.com>, wrote:\r\n> Hi Max Redis ,\r\n>\r\n> My colleague reached out to you a few months ago.\r\n>\r\n> I am reconnecting to see if you are keen to find out how we've helped companies similar to yours qualify marketing leads and book sales conversations at scale.\r\n>\r\n> Will you be free for a call sometime this or next week?\r\n",
-        },
+        type: 'task',
       },
-      jsonapi: {
-        version: '1.0',
-      },
+      jsonapi: { version: '1.0' },
     };
-    expect(jsonApiNormalize(response)).toEqual({
+
+    expect(normalize(response)).toEqual({
       id: '55',
-      type: 'tasks',
-      subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
-      body:
-        "Sender Max Lorenz <max@saleswhale.com>\r\nTo: max+redis_01@saleswhale.com, Chocolate Sim <chocolate.sim@saleswhale.com>\r\n\r\nYes, I am interested\r\n\r\nMax\r\nOn 8 Jan 2020, 4:34 PM +0800, Chocolate Sim <chocolate.sim@saleswhale.com>, wrote:\r\n> Hi Max Redis ,\r\n>\r\n> My colleague reached out to you a few months ago.\r\n>\r\n> I am reconnecting to see if you are keen to find out how we've helped companies similar to yours qualify marketing leads and book sales conversations at scale.\r\n>\r\n> Will you be free for a call sometime this or next week?\r\n",
+      type: 'task',
       meta: {},
     });
   });
 
-  it('should not deserialize response without jsonapi spec', () => {
+  it('should normalize response with attributes', () => {
     const response = {
-      id: 1848,
-      subject: 'Re: Hi Stephane, reaching out from Seamless Philippines',
-      body: 'reply',
+      data: {
+        id: '55',
+        type: 'task',
+        attributes: {
+          subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+          body: 'Will you be free for a call sometime this or next week',
+        },
+      },
+      jsonapi: { version: '1.0' },
     };
-    expect(jsonApiNormalize(response)).toEqual({
-      id: 1848,
-      subject: 'Re: Hi Stephane, reaching out from Seamless Philippines',
-      body: 'reply',
+    expect(normalize(response)).toEqual({
+      id: '55',
+      type: 'task',
+      subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+      body: 'Will you be free for a call sometime this or next week',
+      meta: {},
+    });
+  });
+
+  it('should normalize with included', () => {
+    const response = {
+      data: {
+        id: '55',
+        type: 'task',
+        attributes: {
+          subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+          body: 'Will you be free for a call sometime this or next week',
+        },
+        relationships: {
+          campaign: {
+            data: {
+              id: '12',
+              type: 'campaign',
+            },
+          },
+        },
+      },
+      included: [{ id: '12', type: 'campaign', attributes: { name: 'test campaign' } }],
+      jsonapi: { version: '1.0' },
+    };
+
+    expect(normalize(response)).toEqual({
+      id: '55',
+      type: 'task',
+      subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+      body: 'Will you be free for a call sometime this or next week',
+      campaign: {
+        id: '12',
+        type: 'campaign',
+        name: 'test campaign',
+      },
+      meta: {},
+    });
+  });
+
+  it('should normalize even without included', () => {
+    const response = {
+      data: {
+        id: '55',
+        type: 'task',
+        attributes: {
+          subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+          body: 'Will you be free for a call sometime this or next week',
+        },
+        relationships: {
+          campaign: {
+            data: {
+              id: '12',
+              type: 'campaign',
+            },
+          },
+        },
+      },
+      jsonapi: { version: '1.0' },
+    };
+
+    expect(normalize(response)).toEqual({
+      id: '55',
+      type: 'task',
+      subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+      body: 'Will you be free for a call sometime this or next week',
+      campaign: {
+        id: undefined,
+        type: undefined,
+      },
+      meta: {},
+    });
+  });
+
+  it('should normalize with meta', () => {
+    const response = {
+      data: {
+        id: '55',
+        type: 'task',
+        attributes: {
+          subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+          body: 'Will you be free for a call sometime this or next week',
+        },
+      },
+      meta: { currentPage: 1 },
+      jsonapi: { version: '1.0' },
+    };
+
+    expect(normalize(response)).toEqual({
+      id: '55',
+      type: 'task',
+      subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+      body: 'Will you be free for a call sometime this or next week',
+      meta: { currentPage: 1 },
+    });
+  });
+
+  it('should normalize array of data', () => {
+    const response = {
+      data: [
+        {
+          id: '55',
+          type: 'task',
+          attributes: {
+            subject: 'mysubject',
+            body: 'mybody',
+          },
+        },
+        {
+          id: '56',
+          type: 'task',
+          attributes: {
+            subject: 'mysubject',
+            body: 'mybody',
+          },
+        },
+      ],
+      meta: { currentPage: 1 },
+      jsonapi: { version: '1.0' },
+    };
+
+    expect(normalize(response)).toEqual([
+      {
+        id: '55',
+        type: 'task',
+        subject: 'mysubject',
+        body: 'mybody',
+        meta: { currentPage: 1 },
+      },
+      {
+        id: '56',
+        type: 'task',
+        subject: 'mysubject',
+        body: 'mybody',
+        meta: { currentPage: 1 },
+      },
+    ]);
+  });
+
+  it('should normalize with multiple level relationships', () => {
+    const response = {
+      data: {
+        id: '55',
+        type: 'task',
+        attributes: {
+          subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+          body: 'Will you be free for a call sometime this or next week',
+        },
+        relationships: {
+          campaign: {
+            data: {
+              id: '12',
+              type: 'campaign',
+            },
+          },
+        },
+      },
+      included: [
+        {
+          id: '12',
+          type: 'campaign',
+          attributes: { name: 'test campaign', description: 'this is a test campaign' },
+          relationships: {
+            topic: {
+              data: {
+                id: '42',
+                type: 'topic',
+              },
+            },
+          },
+        },
+        { id: '42', type: 'topic', attributes: { name: 'test topic' } },
+      ],
+      jsonapi: { version: '1.0' },
+    };
+
+    expect(normalize(response)).toEqual({
+      id: '55',
+      type: 'task',
+      subject: 'Re: [To: ["max+redis_01@saleswhale.com"]]Hi Max Redis',
+      body: 'Will you be free for a call sometime this or next week',
+      campaign: {
+        id: '12',
+        type: 'campaign',
+        name: 'test campaign',
+        description: 'this is a test campaign',
+        topic: {
+          id: '42',
+          type: 'topic',
+          name: 'test topic',
+        },
+      },
+      meta: {},
     });
   });
 });

@@ -2,32 +2,44 @@
 
 const fp = require('lodash/fp');
 
-const { path, reduce, flow, find } = fp;
+const { path, reduce: reduceFp, flow, find } = fp;
 
-const reduceWithIndex = reduce.convert({ cap: false });
+const reduce = reduceFp.convert({ cap: false });
 
+const getAttributes = path('attributes');
 const getRelationships = path('relationships');
 
-const getAndPolyfillRelationships = included =>
+const polyfillRelationships = included =>
   flow(
     getRelationships,
-    reduceWithIndex((acc, relationship, key) => {
+    reduce((acc, relationship, key) => {
       const fullRelationship =
-        find(inc => inc.id === relationship.data.id, included) || relationship;
+        find(
+          inc => inc.type === relationship.data.type && inc.id === relationship.data.id,
+          included
+        ) || relationship;
       if (fullRelationship) {
+        let polyfills = getAttributes(fullRelationship);
+
+        if (getRelationships(fullRelationship)) {
+          polyfills = {
+            ...polyfills,
+            ...polyfillRelationships(included)(fullRelationship),
+          };
+        }
+
         return {
           ...acc,
           [key]: {
             id: fullRelationship.id,
-            ...fullRelationship.attributes,
+            type: fullRelationship.type,
+            ...polyfills,
           },
         };
       }
       return acc;
     }, {})
   );
-
-const getAttributes = path('attributes');
 
 const normalize = response => {
   if (!response.jsonapi) {
@@ -40,7 +52,7 @@ const normalize = response => {
       id: record.id,
       type: record.type,
       ...getAttributes(record),
-      ...getAndPolyfillRelationships(included)(record),
+      ...polyfillRelationships(included)(record),
       meta,
     }));
   }
@@ -49,7 +61,7 @@ const normalize = response => {
     id: data.id,
     type: data.type,
     ...getAttributes(data),
-    ...getAndPolyfillRelationships(included)(data),
+    ...polyfillRelationships(included)(data),
     meta,
   };
 };

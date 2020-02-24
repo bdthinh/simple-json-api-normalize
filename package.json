@@ -1,5 +1,5 @@
 {
-  "name": "json-api-normalizer",
+  "name": "jsonapi-normalize",
   "version": "1.0.0",
   "description": "Normalizer to simple object for json-api-spec",
   "main": "src/index.js",
@@ -8,7 +8,7 @@
   },
   "keywords": [
     "jsonApiNormalize",
-    "json-api-normalize",
+    "jsonapi-normalize",
     "normalize",
     "jsonapi",
     "json-api"
