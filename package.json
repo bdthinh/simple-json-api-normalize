@@ -1,5 +1,5 @@
 {
-  "name": "jsonapi-normalize",
+  "name": "simple-json-api-normalize",
   "version": "1.0.0",
   "description": "Normalizer to simple object for json-api-spec",
   "main": "src/index.js",
@@ -7,11 +7,12 @@
     "test": "jest"
   },
   "keywords": [
-    "jsonApiNormalize",
-    "jsonapi-normalize",
+    "simpleJsonApiNormalize",
+    "simple-json-api-normalize",
     "normalize",
     "jsonapi",
-    "json-api"
+    "json-api",
+    "simple-normalize"
   ],
   "author": "Thinh D. Bui",
   "license": "ISC",
