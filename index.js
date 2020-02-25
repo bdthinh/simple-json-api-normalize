@@ -34,7 +34,7 @@ const polyfillAttributes = (included = []) => record => {
 };
 
 const normalize = response => {
-  if (!response.jsonapi) {
+  if (!response.jsonapi || !response.data) {
     return response;
   }
 

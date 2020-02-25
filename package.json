@@ -1,6 +1,6 @@
 {
   "name": "simple-json-api-normalize",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Normalizer to simple object for json-api-spec",
   "main": "bundle.js",
   "scripts": {

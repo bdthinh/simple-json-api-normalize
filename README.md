@@ -9,7 +9,7 @@ If you are new to JSON api we recommend you browse [json api website](http://jso
 
 ## Examples
 
-This normalizer only works with json:api response having key `jsonapi` at root.
+This normalizer only works with json:api response having key `jsonapi` at root, or at least having key `data`.
 
 ```js
 jsonapi: {
