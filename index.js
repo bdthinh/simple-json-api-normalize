@@ -1,47 +1,39 @@
 'use strict';
 
-const fp = require('lodash/fp');
+const getAttributes = record => record && record.attributes;
+const getRelationships = record => record && record.relationships;
 
-const { path, reduce: reduceFp, flow, find } = fp;
+const polyfillAttributes = (included = []) => record => {
+  const relationships = getRelationships(record);
+  if (!relationships) return [];
 
-const reduce = reduceFp.convert({ cap: false });
+  return Object.keys(relationships).reduce((acc, key) => {
+    const currentRelation = relationships[key];
+    const extendRelation =
+      included.find(
+        inc => inc.type === currentRelation.data.type && inc.id === currentRelation.data.id
+      ) || currentRelation;
 
-const getAttributes = path('attributes');
-const getRelationships = path('relationships');
+    if (!extendRelation) return acc;
 
-const polyfillRelationships = included =>
-  flow(
-    getRelationships,
-
-    reduce((acc, relationRecord, key) => {
-      const extendRelationRecord =
-        find(
-          inc => inc.type === relationRecord.data.type && inc.id === relationRecord.data.id,
-          included
-        ) || relationRecord;
-
-      if (!extendRelationRecord) {
-        return acc;
-      }
-
-      let polyfills = getAttributes(extendRelationRecord);
-      if (getRelationships(extendRelationRecord)) {
-        polyfills = {
-          ...polyfills,
-          ...polyfillRelationships(included)(extendRelationRecord),
-        };
-      }
-
-      return {
-        ...acc,
-        [key]: {
-          id: extendRelationRecord.id,
-          type: extendRelationRecord.type,
-          ...polyfills,
-        },
+    let polyfill = getAttributes(extendRelation);
+    if (getRelationships(extendRelation)) {
+      polyfill = {
+        ...polyfill,
+        ...polyfillAttributes(included)(extendRelation),
       };
-    }, {})
-  );
+    }
+
+    return {
+      ...acc,
+      [key]: {
+        id: extendRelation.id,
+        type: extendRelation.type,
+        ...polyfill,
+      },
+    };
+  }, {});
+};
 
 const normalize = response => {
   if (!response.jsonapi) {
@@ -54,7 +46,7 @@ const normalize = response => {
       id: record.id,
       type: record.type,
       ...getAttributes(record),
-      ...polyfillRelationships(included)(record),
+      ...polyfillAttributes(included)(record),
       meta,
     }));
   }
@@ -63,7 +55,7 @@ const normalize = response => {
     id: data.id,
     type: data.type,
     ...getAttributes(data),
-    ...polyfillRelationships(included)(data),
+    ...polyfillAttributes(included)(data),
     meta,
   };
 };
