@@ -1,6 +1,6 @@
 {
   "name": "simple-json-api-normalize",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Normalizer to simple object for json-api-spec",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/bdthinh/simple-json-api-normalizer/issues"
   },
-  "homepage": "https://github.com/bdthinh/simple-json-api-normalizer#readme",
+  "homepage": "https://github.com/bdthinh/simple-json-api-normalize#readme",
   "dependencies": {},
   "devDependencies": {
     "jest": "^25.1.0"
