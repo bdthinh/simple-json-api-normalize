@@ -1,5 +1,3 @@
-'use strict';
-
 const getAttributes = record => record && record.attributes;
 const getRelationships = record => record && record.relationships;
 
