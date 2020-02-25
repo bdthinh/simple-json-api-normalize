@@ -40,7 +40,7 @@ var polyfillAttributes = function polyfillAttributes() {
 };
 
 var normalize = function normalize(response) {
-  if (!response.jsonapi || !response.data) {
+  if (!response.jsonapi && !response.data) {
     return response;
   }
 
