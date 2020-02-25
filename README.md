@@ -1,26 +1,27 @@
 # SIMPLE json-api normalize
 
-A simple way to traverse datasets based on JSON API specification.
-Normalize is a lightweight javascript library with simple and powerful api.
+A simple way to normalize datasets based on JSON API specification to powerful objects and their relationships
+so that you can use directly and natively.
+Normalizer is a lightweight javascript library with simple and powerful api.
 
 json:api is a specification for building apis in JSON.
 If you are new to JSON api we recommend you browse [json api website](http://jsonapi.org/) and [examples](http://jsonapi.org/examples/) to familiarize yourself with specification. This library is built upon standards and conventions of JSON api and provides a simple way to traverse and retrieve all those attributes and relations.
 
 ## Examples
 
-This normalizer only works with json:api response having key
+This normalizer only works with json:api response having key `jsonapi` at root.
 
+```js
+jsonapi: {
+  version: 'xxx';
+}
 ```
-jsonapi: { version: 'xxx' }
-```
-
-at root.
 
 Lets start with a typical JSON api formatted dataset:
 
 ### Single resource object
 
-```
+```js
 const response = {
   data: {
     id: '55',
@@ -47,7 +48,7 @@ The normalzer will append `meta` key to each object.
 
 ### Array of resource objects
 
-```
+```js
 const response = {
   data: [
     {
@@ -95,7 +96,7 @@ The normalzer will append `meta` key to each object.
 
 ### Resource object with relationships and included
 
-```
+```js
 const response = {
   data: {
     id: '55',
