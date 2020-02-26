@@ -1,8 +1,11 @@
 {
   "name": "simple-json-api-normalize",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Normalizer to simple object for json-api-spec",
   "main": "bundle.js",
+  "files": [
+    "bundle.js"
+  ],
   "scripts": {
     "test": "jest",
     "babel": "./node_modules/.bin/babel index.js --out-file bundle.js"
