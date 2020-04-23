@@ -14,6 +14,25 @@ var getRelationships = function getRelationships(record) {
   return record && record.relationships;
 };
 
+var polyfillFullData = function polyfillFullData() {
+  var included = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  return function (compactData) {
+    var data = included.find(function (inc) {
+      return inc.type === compactData.type && inc.id === compactData.id;
+    }) || compactData;
+    var polyfill = getAttributes(data);
+
+    if (getRelationships(data)) {
+      polyfill = _objectSpread({}, polyfill, {}, polyfillAttributes(included)(data));
+    }
+
+    return _objectSpread({
+      id: data.id,
+      type: data.type
+    }, polyfill);
+  };
+};
+
 var polyfillAttributes = function polyfillAttributes() {
   var included = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   return function (record) {
@@ -21,20 +40,19 @@ var polyfillAttributes = function polyfillAttributes() {
     if (!relationships) return [];
     return Object.keys(relationships).reduce(function (acc, key) {
       var currentRelation = relationships[key];
-      var extendRelation = included.find(function (inc) {
-        return inc.type === currentRelation.data.type && inc.id === currentRelation.data.id;
-      }) || currentRelation;
-      if (!extendRelation) return acc;
-      var polyfill = getAttributes(extendRelation);
+      var relationData = currentRelation.data;
+      if (!relationData) return acc;
+      var value = undefined;
 
-      if (getRelationships(extendRelation)) {
-        polyfill = _objectSpread({}, polyfill, {}, polyfillAttributes(included)(extendRelation));
+      if (Array.isArray(relationData)) {
+        value = relationData.map(function (eachRelation) {
+          return polyfillFullData(included)(eachRelation);
+        });
+      } else {
+        value = polyfillFullData(included)(relationData);
       }
 
-      return _objectSpread({}, acc, _defineProperty({}, key, _objectSpread({
-        id: extendRelation.id,
-        type: extendRelation.type
-      }, polyfill)));
+      return _objectSpread({}, acc, _defineProperty({}, key, value));
     }, {});
   };
 };
